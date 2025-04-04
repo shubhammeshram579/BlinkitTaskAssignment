@@ -1,47 +1,8 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
-const data = [
-  {
-    name: "Delhi",
-    sales: 93132.12,
-    outOfStock: "1.68%",
-    totalInventory: 931.9,
-    avgRank: 3.2,
-    traffic: 12033,
-    impressions: 25005,
-  },
-  {
-    name: "Bengaluru",
-    sales: 8526.32,
-    outOfStock: "6.79%",
-    totalInventory: 679,
-    avgRank: 7,
-    traffic: 3005,
-    impressions: 4231,
-  },
-  {
-    name: "SKU 3",
-    sales: 3913,
-    outOfStock: "1.68%",
-    totalInventory: 931.9,
-    avgRank: 11,
-    traffic: 1931.9,
-    impressions: 931.9,
-  },
-  {
-    name: "SKU 4",
-    sales: 0,
-    outOfStock: "0%",
-    totalInventory: 0,
-    avgRank: 0,
-    traffic: 0,
-    impressions: 0,
-  },
-];
-
-const  CityDataTable = ({query, fetchData,dataAPI }) => {
+const CityDataTable = ({ fetchData }) => {
   const [selectedItems, setSelectedItems] = useState(new Set());
-  const [cdata ,setCData] = useState(null)
+  const [cdata, setCData] = useState([]);
 
   const toggleSelection = (name) => {
     setSelectedItems((prev) => {
@@ -55,77 +16,155 @@ const  CityDataTable = ({query, fetchData,dataAPI }) => {
     });
   };
 
+  const query = {
+    measures: [
+      "blinkit_insights_city.sales_mrp_sum",
+      "blinkit_insights_city.qty_sold",
+      "blinkit_insights_city.drr_7",
+      "blinkit_insights_city.drr_14",
+      "blinkit_insights_city.drr_30",
+      "blinkit_insights_city.sales_mrp_max",
+      "blinkit_insights_city.month_to_date_sales",
+      "blinkit_insights_city.be_inv_qty",
+      "blinkit_insights_city.fe_inv_qty",
+      "blinkit_insights_city.inv_qty",
+      "blinkit_insights_city.days_of_inventory_14",
+      "blinkit_insights_city.days_of_inventory_max"
+    ],
+    dimensions: ["blinkit_insights_city.id", "blinkit_insights_city.name"],
+    timeDimensions: [
+      {
+        dimension: "blinkit_insights_city.created_at",
+        dateRange: ["2025-02-01", "2025-02-28"],
+        granularity: "month"
+      }
+    ]
+  };
 
   useEffect(() => {
     const loadData = async () => {
-      const cahrtdata = await  fetchData(query)
-      
-      if (Array.isArray(cahrtdata)) {
-        setCData(cahrtdata);
-      }
+      try {
+        const chartData = await fetchData(query);
+        console.log("Fetched Data:", chartData);
 
-    }
+        if (Array.isArray(chartData)) {
+          setCData(chartData);
+        } else {
+          console.error("Invalid data format received:", chartData);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
     loadData();
+  }, [fetchData]);
 
-  },[])
+
+  // Convert string values to numbers and sum them up
+const totalSalesMRP = cdata.reduce((sum, item) => sum + (parseFloat(item["blinkit_insights_city.sales_mrp_sum"]) || 0), 0);
+const totalQtySold = cdata.reduce((sum, item) => sum + (parseFloat(item["blinkit_insights_city.qty_sold"]) || 0), 0);
+const totalDrr7 = cdata.reduce((sum, item) => sum + (parseFloat(item["blinkit_insights_city.drr_7"]) || 0), 0);
+const totalDrr14 = cdata.reduce((sum, item) => sum + (parseFloat(item["blinkit_insights_city.drr_14"]) || 0), 0);
+const totalDrr30 = cdata.reduce((sum, item) => sum + (parseFloat(item["blinkit_insights_city.drr_30"]) || 0), 0);
+const totalMtdSales = cdata.reduce((sum, item) => sum + (parseFloat(item["blinkit_insights_city.month_to_date_sales"]) || 0), 0);
+const totalInventory = cdata.reduce((sum, item) => sum + (parseFloat(item["blinkit_insights_city.inv_qty"]) || 0), 0);
+
 
   return (
-    <div className="p-4">
-    <div className="flex items-center justify-between p-5">
-      <h2 className="text-xl font-semibold mb-4 text-start flex flex-col">City Level Data <span className="text-xs">Analytics for all your cities</span></h2>
-      <button className="bg-green-700 rounded-lg px-3 py-2">Filter1 <i class="fa-solid fa-chevron-down"></i></button>
+    <div className="p-4 bg-white shadow-md rounded-lg">
+      <div className="flex items-center justify-between p-5 border-b">
+        <h2 className="text-lg font-semibold flex flex-col">
+          City Level Data
+          <span className="text-sm text-gray-500">Analytics for all Cities</span>
+        </h2>
+        <button className="bg-green-700 text-white rounded-lg px-3 py-2 text-sm flex items-center">
+          Filter <i className="fa-solid fa-chevron-down ml-2"></i>
+        </button>
       </div>
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border p-2">Select</th>
-            <th className="border p-2">City Name</th>
-            <th className="border p-2">Sales</th>
-            <th className="border p-2">Out of Stock</th>
-            <th className="border p-2">Total Inventory</th>
-            <th className="border p-2">Average Rank</th>
-            <th className="border p-2">Est. Traffic</th>
-            <th className="border p-2">Est. Impressions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((item) => (
-            <tr
-              key={item.name}
-              className={`border ${selectedItems.has(item.name) ? "bg-green-100" : ""}`}
-            >
-              <td className="border p-2 text-center">
-                <input
-                  type="checkbox"
-                  checked={selectedItems.has(item.name)}
-                  onChange={() => toggleSelection(item.name)}
-                />
-              </td>
-              <td className="border p-2 font-semibold text-green-700">{item.name}</td>
-              <td className="border p-2">₹{item.sales.toLocaleString()}</td>
-              <td className="border p-2">{item.outOfStock}</td>
-              <td className="border p-2">{item.totalInventory}</td>
-              <td className="border p-2">{item.avgRank}</td>
-              <td className="border p-2">{item.traffic}</td>
-              <td className="border p-2">{item.impressions}</td>
+
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-sm">
+          <thead className="bg-gray-100 border-b">
+            <tr>
+              <th className="border p-3 text-left">Select</th>
+              <th className="border p-3 text-left">City ID</th>
+              <th className="border p-3 text-left">City Name</th>
+              <th className="border p-3 text-left">Sales MRP</th>
+              <th className="border p-3 text-left">Qty Sold</th>
+              <th className="border p-3 text-left">DRR 7</th>
+              <th className="border p-3 text-left">DRR 14</th>
+              <th className="border p-3 text-left">DRR 30</th>
+              <th className="border p-3 text-left">MTD Sales</th>
+              <th className="border p-3 text-left">Inventory</th>
             </tr>
-          ))}
-          <tr className="font-bold border-t bg-gray-200">
-            <td className="border p-2">-</td>
-            <td className="border p-2">Total</td>
-            <td className="border p-2">₹{data.reduce((sum, item) => sum + item.sales, 0).toLocaleString()}</td>
-            <td className="border p-2">16%</td>
-            <td className="border p-2">2931</td>
-            <td className="border p-2">8.3</td>
-            <td className="border p-2">61,985</td>
-            <td className="border p-2">2,61,768</td>
-          </tr>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {cdata.length > 0 ? (
+              cdata.map((item) => (
+                <tr
+                  key={item["blinkit_insights_city.id"]}
+                  className={`border-b ${selectedItems.has(item["blinkit_insights_city.name"]) ? "bg-green-200" : ""}`}
+                >
+                  <td className="border p-3 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.has(item["blinkit_insights_city.name"])}
+                      onChange={() => toggleSelection(item["blinkit_insights_city.name"])}
+                    />
+                  </td>
+                  <td className="border p-3">{item["blinkit_insights_city.id"]}</td>
+                    <td className="border p-3">{item["blinkit_insights_city.name"]}</td>
+                    <td className="border p-3">
+                      ₹{parseFloat(item["blinkit_insights_city.sales_mrp_sum"] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                    <td className="border p-3">
+                      {parseFloat(item["blinkit_insights_city.qty_sold"] || 0).toLocaleString()}
+                    </td>
+                    <td className="border p-3">
+                      {parseFloat(item["blinkit_insights_city.drr_7"] || 0).toFixed(2)}
+                    </td>
+                    <td className="border p-3">
+                      {parseFloat(item["blinkit_insights_city.drr_14"] || 0).toFixed(2)}
+                    </td>
+                    <td className="border p-3">
+                      {parseFloat(item["blinkit_insights_city.drr_30"] || 0).toFixed(2)}
+                    </td>
+                    <td className="border p-3">
+                      ₹{parseFloat(item["blinkit_insights_city.month_to_date_sales"] || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                    <td className="border p-3">
+                      {parseFloat(item["blinkit_insights_city.inv_qty"] || 0).toLocaleString()}
+                    </td>
+
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="10" className="text-center p-4 text-gray-500">
+                  No data available
+                </td>
+              </tr>
+            )}
+            {cdata.length > 0 && (
+              <tr className="font-bold border-t bg-gray-200">
+                <td className="border p-3">-</td>
+                <td className="border p-3">Total</td>
+                <td className="border p-3">-</td>
+                <td className="border p-3">₹{totalSalesMRP.toLocaleString()}</td>
+                <td className="border p-3">{totalQtySold.toLocaleString()}</td>
+                <td className="border p-3">{totalDrr7.toLocaleString()}</td>
+                <td className="border p-3">{totalDrr14.toLocaleString()}</td>
+                <td className="border p-3">{totalDrr30.toLocaleString()}</td>
+                <td className="border p-3">₹{totalMtdSales.toLocaleString()}</td>
+                <td className="border p-3">{totalInventory.toLocaleString()}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-}
+};
 
-
-export default CityDataTable
+export default CityDataTable;

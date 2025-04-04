@@ -4,40 +4,17 @@ import TopCitiesChart from "./PieChartCity.jsx";
 import SoldQuantityChart from "./TotalQty.jsx";
 import SKUDataTable from "./Table1.jsx";
 import CityDataTable from "./Table2.jsx";
-
-import { jsonData } from "./Data/Data.js";
-
 import axios from "axios";
 
 const BlickitHome = () => {
-  const [cards, setCards] = useState([]);
 
-  const [queryData, setQueryData] = useState(null);
-
-  useEffect(() => {
-    const fetchJSONData = async () => {
-      try {
-        const response = await jsonData.cards.filter((card) => {
-          return card;
-        });
-
-        setCards(response);
-      } catch (error) {
-        console.error("Error fetching JSON data", error);
-      }
-    };
-
-    fetchJSONData();
-  }, []);
+  
 
   const fetchData = async (query) => {
     try {
-      const parsedQuery = JSON.parse(query);
-      console.log(parsedQuery);
-
       const response = await axios.post(
         "https://amaranth-muskox.aws-us-east-1.cubecloudapp.dev/dev-mode/feat/frontend-hiring-task/cubejs-api/v1/load",
-        { query: parsedQuery[0] }, // Ensure it's wrapped properly
+        { query }, // directly pass the object
         {
           headers: {
             Authorization: `Bearer ${import.meta.env.VITE_CUBEJS_API_KEY}`,
@@ -47,8 +24,6 @@ const BlickitHome = () => {
       );
 
       console.log("Full API Response:", response.data);
-
-      setQueryData(response.data);
 
       return response.data.data;
     } catch (error) {
@@ -60,6 +35,8 @@ const BlickitHome = () => {
     }
   };
 
+
+
   return (
     <>
       <div className="bg-zinc-200">
@@ -68,34 +45,22 @@ const BlickitHome = () => {
           <div className="flex items-center justify-between gap-2">
             <i class="fa-solid fa-toggle-off"></i>
             <i class="fa-solid fa-calendar-days"></i>
-            <p>Aug/01/2024 - Aug/03/2024</p>
+            <p>Feb/01/2024 - Feb/28/2024</p>
           </div>
         </div>
         <h1 className="text-start pl-3 pb-2">Blikit</h1>
+        <div className="flex items-center justify-evenly gap-6">
+          <SalesQuantityChart fetchData={fetchData} />
 
-        {cards.map((ite) => (
-          <div key={ite.id}>
-            <div className="flex items-center justify-evenly gap-6">
-            {ite.visualizationType === "linechart1" && (
-              <SalesQuantityChart dataAPI={queryData} query={ite.query} fetchData={fetchData} />
-            )}
-            {ite.visualizationType === "linechart1" && (
-              <SoldQuantityChart dataAPI={queryData} query={ite.query} fetchData={fetchData} />
-            )}
-            {ite.visualizationType === "linechart1" && (
-              <TopCitiesChart dataAPI={queryData} query={ite.query} fetchData={fetchData} />
-            )}
-            </div>
-            <div>
-            {ite.visualizationType === "linechart1" && (
-              <SKUDataTable dataAPI={queryData} query={ite.query} fetchData={fetchData} />
-            )}
-            {ite.visualizationType === "linechart1" &&  (
-              <CityDataTable dataAPI={queryData} query={ite.query} fetchData={fetchData} />
-            )}
-            </div>
-          </div>
-        ))}
+          <SoldQuantityChart fetchData={fetchData} />
+
+          <TopCitiesChart fetchData={fetchData} />
+        </div>
+        <div>
+          <SKUDataTable fetchData={fetchData} />
+
+          <CityDataTable fetchData={fetchData} />
+        </div>
       </div>
     </>
   );

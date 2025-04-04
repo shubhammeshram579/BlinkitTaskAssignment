@@ -63,7 +63,7 @@ export const jsonData = {
         "active": true
       },
       {
-        "visualizationType": "table1",
+        "visualizationType": "table",
         "title": "Product Insights",
         "id": "blinkit-insights-sku",
         "logo": "/icons/blinkit.svg",
@@ -118,7 +118,7 @@ export const jsonData = {
         "active": true
       },
       {
-        "visualizationType": "table2",
+        "visualizationType": "table",
         "title": "City Insights",
         "id": "blinkit-insights-city",
         "logo": "/icons/blinkit.svg",
