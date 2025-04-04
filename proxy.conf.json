@@ -1,0 +1,8 @@
+{
+    "/cubejs-api": {
+      "target": "https://amaranth-muskox.aws-us-east-1.cubecloudapp.dev/dev-mode/feat/frontend-hiring-task",
+      "changeOrigin": true,
+      "secure": false
+    }
+  }
+  
