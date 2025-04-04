@@ -144,6 +144,22 @@ const SKUDataTable = ({ fetchData }) => {
               </tr>
             )}
           </tbody>
+          {/* Sticky Footer Row */}
+          <tfoot className="sticky bottom-0 bg-gray-200 z-10 ">
+              <tr className="font-bold border">
+                <td className="border p-2">-</td>
+                <td className="border p-2">Total</td>
+                <td className="border p-2">-</td>
+                <td className="border p-2">₹{totalSalesMRP.toLocaleString()}</td>
+                <td className="border p-2">{totalQtySold.toLocaleString()}</td>
+                <td className="border p-2">{totalDrr7.toLocaleString()}</td>
+                <td className="border p-2">{totalDrr14.toLocaleString()}</td>
+                <td className="border p-2">{totalDrr30.toLocaleString()}</td>
+                <td className="border p-2">₹{totalMaxSalesMRP.toLocaleString()}</td>
+                <td className="border p-2">₹{totalMtdSales.toLocaleString()}</td>
+                <td className="border p-2">{totalInventory.toLocaleString()}</td>
+              </tr>
+            </tfoot>
         </table>
       </div>
     </div>
